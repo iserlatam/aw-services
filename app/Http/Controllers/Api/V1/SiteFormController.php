@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\SiteFormEmail;
 use App\Models\SiteForm;
 use Illuminate\Http\Request;
+use Illuminate\Mail\SentMessage;
 
 class SiteFormController extends Controller
 {
@@ -41,15 +42,20 @@ class SiteFormController extends Controller
 
             SiteForm::create($request->all());
 
-            Mail::to($toEmail)->send(
-                new SiteFormEmail($userInfo)
-            );
+            // Mail::to($toEmail)->send(
+            //     new SiteFormEmail($userInfo)
+            // );
 
-            if (count(Mail::failures()) > 0) {
+            // if (count(Mail::failures()) > 0) {
+            // }
+
+            if (Mail::to($toEmail)->send(new SiteFormEmail($userInfo)) instanceof SentMessage) {
+                //Success
+                return response()->json(['message' => 'Email succesfully sent'], 200);
+            } else {
+                //Fail
                 return response()->json(['message' => 'Error al enviar el correo'], 500);
             }
-
-            return response()->json(['message' => 'Email succesfully sent'], 200);
         } catch (\Throwable $th) {
             throw $th;
         }
